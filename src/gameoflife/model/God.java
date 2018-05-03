@@ -29,7 +29,11 @@ public class God {
         actionsCount++;
     }
     private void decrimentActions(){
-        actionsCount--;
+        if ( actionsCount >= 0){
+            actionsCount--;
+        }else {
+            throw new RuntimeException("Попытка сделать действие, уводящее кол-во действий в минус");
+        }
     }
     public God(){
         colony = new Colony();
@@ -77,7 +81,4 @@ public class God {
         }
     }
     
-    
-    
-   
 }

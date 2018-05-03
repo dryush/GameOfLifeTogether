@@ -5,6 +5,7 @@
  */
 package gameoflife;
 
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javafx.application.Platform;
@@ -19,6 +20,10 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import java.util.ArrayList;
+
+import Infrastructure.*;
+import gameoflife.model.*;
 /**
  *
  * @author dryush
@@ -55,6 +60,7 @@ public class GameOfLife extends JApplet {
                 frame.setVisible(true);
                 
                 applet.start();
+                ((GameOfLife)applet).initGameSession();
             }
         });
     }
@@ -72,6 +78,21 @@ public class GameOfLife extends JApplet {
                 createScene();
             }
         });
+    }
+    
+    public void initGameSession(){
+        Field.FieldBuilder fieldBuilder = new Field.FieldBuilder();
+        ArrayList<God> gods = new ArrayList<>();
+        gods.add(new God());
+        gods.add(new God());
+        
+        Field f = fieldBuilder.setSize(new Size(10,10))
+                .setGods(gods)
+                .setShape(new Field.FlatSphere())
+                .build();
+        
+        GameSession s = new GameSession(f, gods, 10, 10);
+        
     }
     
     private void createScene() {
