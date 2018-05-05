@@ -34,7 +34,13 @@ public class GameSession {
     public GameStage_Development getGameStage_Development(){
         return _developmentStage;
     }
-    private class GameStage_Development {
+    public GameStage_PlayerMoves getGameStage_PlayerMoves(){
+        return _playersMoveStage;
+    }
+    public GameStage_GameOverCheck getGameStage_GameOverCheck(){
+        return _checkGameOverStage;
+    }
+    public class GameStage_Development {
 
         private int epochCount;
         private ArrayList<Colony> colonies; 
@@ -48,7 +54,12 @@ public class GameSession {
             
             for ( int i = 0; i < epochCount; i++){
                 
+                ArrayList<Colony> fixedColonies = new ArrayList<>();
                 for ( Colony colony : colonies){
+                    fixedColonies.add(colony.clone());
+                }
+                
+                for ( Colony colony : fixedColonies){
                     for ( Creature creature : colony.getCreatures()){
                         creature.liveEpoch();
                     }
@@ -63,7 +74,7 @@ public class GameSession {
         }
     }
     
-    private class GameStage_PlayerMoves{
+    public class GameStage_PlayerMoves{
 
         private ArrayList<God> gods;
         private int actionsCount = 0;
@@ -76,21 +87,28 @@ public class GameSession {
             return actionsCount;
         }
         
-        private static final int BEFORE_FIRST = -1;
+        private static final int BEFORE_FIRST = 0;
         private int iCurrentGod = BEFORE_FIRST;
         
-        public God startNext(){
-            God next = null;
+        public God startStage(){
+            iCurrentGod = 0;
+            return startGodMove();
+        }
+        
+        public God startGodMove(){
+            God god = gods.get(iCurrentGod);
+            god.setActionsCount(actionsCount);
             
+            return god;
+        }
+        
+        public void endGodMove(){
+            gods.get(iCurrentGod).getColony().getCreatures().forEach((c) -> c.endEpoch());
             iCurrentGod++;
-            if ( iCurrentGod < gods.size()){
-                next = gods.get(iCurrentGod);
-                next.setActionsCount(actionsCount);
-            } else {
-                iCurrentGod = BEFORE_FIRST;
-                next = null;
-            }
-            return next;
+        } 
+        
+        public boolean isAllMoved(){
+            return iCurrentGod+1 > gods.size();
         }
         
         public void  doPLayerAction(Cell cell){
@@ -98,13 +116,13 @@ public class GameSession {
         }
     }
     
-    private enum GameStatus {
+    public enum GameStatus {
         CONTINUE,
         WIN,
         DRAW
     }
     
-    private class GameStage_GameOverCheck {
+    public class GameStage_GameOverCheck {
 
         private God winner = null;
         

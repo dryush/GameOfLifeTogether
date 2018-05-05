@@ -3,12 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gameoflife.model;
+package gameoflife.View;
+
+import gameoflife.model.Cell;
 
 /**
  *
  * @author dryush
  */
-public interface ICreatureListener {
-    void onLiveStageChanged(Creature creature);
+public interface IFieldViewListener {
+    void onCellSelect(Cell cell);
 }

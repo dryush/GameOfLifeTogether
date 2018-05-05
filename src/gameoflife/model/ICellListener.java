@@ -9,6 +9,8 @@ package gameoflife.model;
  *
  * @author dryush
  */
-public interface ICreatureListener {
-    void onLiveStageChanged(Creature creature);
+public interface ICellListener {
+    void onCellCreatureSet(Cell cell);
+    void onCellCreatureStageChanged(Cell cell);
+    void onCellCreatureDestroy(Cell cell);
 }

@@ -21,20 +21,26 @@ public class Colony implements ICreatureListener{
     public int getCreaturesCount(){
         return creatures.size();
     }
+    public boolean isFromThisColony(Creature creature){
+        return creatures.contains(creature);
+    }
+    
     
     @Override
-        public void onBirth(Creature creature){
+    public void onLiveStageChanged(Creature creature) {
+        switch (creature.getLiveStage()){
+            case BIRTH : creatures.add(creature); break;
+            case LIVE: break;
+            case DIE: break;
+            case DESTROIED: creatures.remove(creature);
         }
-    @Override
-        public void onLive(Creature creature){
-            creatures.add(creature);
-        }
-    @Override
-        public void onDie(Creature creature){
-            creatures.remove(creature);
-        }
-    @Override
-        public void onDestroy(Creature creature){
-        }
+    }
     
+    
+    public Colony clone(){
+        Colony clon =  new Colony();
+        clon.creatures = (ArrayList<Creature>) this.creatures.clone();
+        return clon;
+    }
+
 }

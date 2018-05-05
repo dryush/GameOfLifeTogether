@@ -22,23 +22,15 @@ public class Creature {
         BIRTH,
         LIVE,
         DIE,
+        DESTROIED,
     }
 
     private Cell cell;
     private LiveStage liveStage = LiveStage.BIRTH;
     
     void setLiveStage(LiveStage stage){
-        switch (stage){
-            case BIRTH : 
-                fireBitrhEvent();
-                break;
-            case LIVE :
-                fireLiveEvent();
-                break;
-            case DIE:
-                fireDieEvent();
-                break; 
-        }
+        liveStage = stage;
+        fireStatusChanged();
     }
     
     public LiveStage getLiveStage(){
@@ -50,8 +42,9 @@ public class Creature {
         return colony;
     }
         
-    
+    Field f = null;
     public Creature(Cell cell, Colony colony){
+        
         this.cell = cell;
         this.colony = colony;
         this.addListener(colony);
@@ -59,22 +52,27 @@ public class Creature {
     }
     
     public void liveEpoch(){
-        int nearbyCreturesCount = 0;
-        for ( Cell nearbyCell : this.cell.getNearbyCells()){
-            if ( nearbyCell.getCreature() == null){
-                initSpawning(nearbyCell);
-            } else {
-                nearbyCreturesCount ++;
+        
+        if ( liveStage == LiveStage.LIVE){
+            int nearbyCreturesCount = 0;
+            for ( Cell nearbyCell : this.cell.getNearbyCells()){
+                if ( nearbyCell.getCreature() == null){
+                    initSpawning(nearbyCell);
+                } else if (nearbyCell.getCreature().getLiveStage() == LiveStage.LIVE ||
+                        nearbyCell.getCreature().getLiveStage() == LiveStage.DIE ){
+                    nearbyCreturesCount ++;
+                }
             }
-        }
-        if ( nearbyCreturesCount > 3 || nearbyCreturesCount < 1){
-            setLiveStage(LiveStage.DIE);
+            
+            if ( nearbyCreturesCount > 3 || nearbyCreturesCount <= 1){
+                setLiveStage(LiveStage.DIE);
+            }
         }
     }
     
     public void endEpoch(){
         if ( liveStage == LiveStage.BIRTH){
-            setLiveStage(LiveStage.BIRTH);
+            setLiveStage(LiveStage.LIVE);
         } else if (liveStage == LiveStage.DIE){
             this.destroy();
         }
@@ -82,57 +80,86 @@ public class Creature {
  
     
     private void destroy(){
-        fireDestroyEvent();
+        this.cell = null;
+        setLiveStage(LiveStage.DESTROIED);
     }
     
     private void initSpawning(Cell cell){
-        ArrayList<Cell> nearbyCells = cell.getNearbyCells();
+        System.out.println("Я существо в x: " + this.cell.x + " y: " + this.cell.y);
+        System.out.println("Инициирую зарождение в x: " + cell.x + " y: " + cell.y);
+        
         HashMap<Colony,ArrayList<Creature>> spawnedCreatures = new HashMap<>();
         HashMap<Colony, Integer> spawnedCreaturesCount = new HashMap<>();
-        for (Cell nearbyCell : nearbyCells){
-            Creature cellCreature = nearbyCell.getCreature();
-            if ( cellCreature != null){
-                Creature spawnedCreature = cellCreature.trySpawnCreature(nearbyCell);
+        //Для каждой соседней клетки, отсноительно текущей
+        //ArrayList<Cell> nearbyCells = cell.getNearbyCells();
+        for (Creature  nearbyCreature : cell.getNearbyCreatures()){
+            //Если в ней есть существо
+            //System.out.println("\tИщу существо в x: " + nearbyCell.x + " y: " + nearbyCell.y);
+            if ( nearbyCreature.isLive()){
+            //System.out.println("\t Нашел существо в x: "+  cellCreature.cell.x + " y: " + cellCreature.cell.y);
+                //оно пробует размножиться в текущую
+                System.out.println("\t\t Предлагаю ему размножиться в x: " + cell.x + " y: " + cell.y);
+                Creature spawnedCreature = nearbyCreature.trySpawnCreature(cell);
                 if (spawnedCreature != null){
-                    spawnedCreatures.getOrDefault(spawnedCreature.colony, 
-                            new ArrayList<>()).add(spawnedCreature);
-                    spawnedCreaturesCount.put(spawnedCreature.colony, 
-                            spawnedCreaturesCount.getOrDefault(spawnedCreature.colony, 0));
+                        ArrayList curColonyCreature = spawnedCreatures.getOrDefault(spawnedCreature.colony, new ArrayList<>());
+                        curColonyCreature.add(spawnedCreature);
+                        spawnedCreatures.put(spawnedCreature.getColony(), curColonyCreature);
                 }
             }
         }
         
         int maxOneColonyCount = 0;
         
-        for ( int count : spawnedCreaturesCount.values()){
-            maxOneColonyCount = Math.max(maxOneColonyCount, count);
+        for ( ArrayList oneColonyCreatires : spawnedCreatures.values()){
+            maxOneColonyCount = Math.max(maxOneColonyCount, oneColonyCreatires.size());
         }
         
-        ArrayList<ArrayList<Creature>> maxColonyCreatures = new ArrayList<>();
-        
-        for (Map.Entry<Colony, ArrayList<Creature>> colonySpawnedCreatures : spawnedCreatures.entrySet()){
-            if ( colonySpawnedCreatures.getValue().size() == maxOneColonyCount ){
-                maxColonyCreatures.add(colonySpawnedCreatures.getValue());
+        if( maxOneColonyCount > 0){
+            ArrayList<ArrayList<Creature>> maxColonyCreatures = new ArrayList<>();
+
+            for (Map.Entry<Colony, ArrayList<Creature>> colonySpawnedCreatures : spawnedCreatures.entrySet()){
+                if ( colonySpawnedCreatures.getValue().size() == maxOneColonyCount ){
+                    maxColonyCreatures.add(colonySpawnedCreatures.getValue());
+                }
             }
+
+            if (maxColonyCreatures.size() > 0)
+                cell.setCreature( 
+                    maxColonyCreatures.get( rand.nextInt(maxColonyCreatures.size())).
+                            get(rand.nextInt(maxOneColonyCount)));
         }
-        
-        if (maxColonyCreatures.size() > 0)
-        cell.setCreature( 
-                maxColonyCreatures.get( rand.nextInt(maxColonyCreatures.size())).
-                        get(rand.nextInt(maxOneColonyCount)));
     }
     
     private Creature trySpawnCreature(Cell cell){
         Creature creature = null;
         int neighborsCount = 0;
         ArrayList<Cell> nearbyCells = cell.getNearbyCells();
+        ArrayList<Cell> cellsWithCreatures = new ArrayList<>();
+        //Считаю соседей клетки, (в том числе себя)
         for ( Cell c : nearbyCells ){
-            if (c.getCreature() != null && c.getCreature().isLive()){
+            if (c.getCreature() != null && ( c.getCreature().getLiveStage() == LiveStage.LIVE || 
+                    c.getCreature().getLiveStage() == LiveStage.DIE ) ){
                 neighborsCount++;
+                cellsWithCreatures.add(c);
             }
         }
-        if ( neighborsCount >= 3){
-            creature = new Creature(this.cell, colony);
+        //if ( neighborsCount >= 3){
+        
+        System.out.println("\t\t Я существо в x: " + this.cell.x + " y: "+this.cell.y);     
+        System.out.println("\t\t\t пытаюсь породить в x: " + cell.x + " y: " + cell.y);
+        
+        
+        for ( int i = 0; i < cellsWithCreatures.size(); i++){
+            System.out.println("\t\t\t\t нашёл соседей в x: " + cellsWithCreatures.get(i).x +" y: " + cellsWithCreatures.get(i).y);
+        }
+        
+        
+        //Должно родиться, если 3
+        if ( neighborsCount == 3){
+            System.out.println("\t\t\tПородился");
+            creature = new Creature(cell, colony);
+        } else {
+            System.out.println("\t\t\tНе удача");
         }
         return creature;
     }
@@ -146,18 +173,12 @@ public class Creature {
     public void addListener(ICreatureListener listener){
         listeners.add(listener);
     }
+    public void removeListener(ICreatureListener listener){
+        listeners.remove(listener);
+    }
     
-    private void fireBitrhEvent(){
-        listeners.forEach((l) -> l.onBirth(this));
-    }
-    private void fireLiveEvent(){
-        listeners.forEach((l) -> l.onLive(this));
-    }
-    private void fireDieEvent(){
-        listeners.forEach((l)->l.onDie(this));
-    }
-    private void fireDestroyEvent(){
-        listeners.forEach((l)-> l.onDestroy(this));
+    private void fireStatusChanged(){
+        ((ArrayList<ICreatureListener>)listeners.clone()).forEach((l) -> l.onLiveStageChanged(this));
     }
     
     /*

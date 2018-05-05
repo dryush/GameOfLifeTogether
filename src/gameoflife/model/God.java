@@ -46,7 +46,7 @@ public class God {
             c.setCreature(newCreature);
             decrimentActions();
         } else if ( cellCreature.getLiveStage() == Creature.LiveStage.DIE){
-            cellCreature.setLiveStage(Creature.LiveStage.BIRTH);
+            cellCreature.setLiveStage(Creature.LiveStage.LIVE);
             incrementActions();
         } else {
             throw new RuntimeException("Нельзя поставить существо на место другого живого существа");
@@ -60,6 +60,8 @@ public class God {
             throw new RuntimeException("Нельзя убить существо в пустой клетке");
         } else if ( cellCreature.getLiveStage() == Creature.LiveStage.BIRTH){
             cellCreature.setLiveStage(Creature.LiveStage.DIE);
+            cellCreature.endEpoch();
+            
             decrimentActions();
         } else if ( cellCreature.getLiveStage() == Creature.LiveStage.LIVE){
             cellCreature.setLiveStage(Creature.LiveStage.DIE);
