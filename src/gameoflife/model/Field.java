@@ -7,6 +7,7 @@ package gameoflife.model;
 
 import Infrastructure.Size;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  *
@@ -22,19 +23,19 @@ public class Field {
     public Size getSize(){
         return size;
     }
-    private ArrayList<God>[][] access = new ArrayList[0][0];
+    private ArrayList<IGod>[][] access = new ArrayList[0][0];
     
-    public ArrayList<God>[][] getCellsAccesses (){
-        ArrayList<God>[][] accesseCopy = new ArrayList[size.getHeight()][size.getWidth()];
+    public ArrayList<IGod>[][] getCellsAccesses (){
+        ArrayList<IGod>[][] accesseCopy = new ArrayList[size.getHeight()][size.getWidth()];
         for (int iX = 0; iX < size.getWidth(); iX++){
             for( int iY = 0; iY < size.getHeight(); iY++){
-                accesseCopy[iY][iX] = (ArrayList<God>) access[iY][iX].clone();
+                accesseCopy[iY][iX] = (ArrayList<IGod>) access[iY][iX].clone();
             }
         }
         return accesseCopy;
     }
     
-    private void allocateCells(ArrayList<God> gods){
+    private void allocateCells(Collection<? extends IGod> gods){
         access = new ArrayList[size.getHeight()][size.getWidth()];
         for (int iX = 0; iX < size.getWidth(); iX++){
             for( int iY = 0; iY < size.getHeight(); iY++){
@@ -42,20 +43,23 @@ public class Field {
             }
         }
         
-        for ( int iGod = 0; iGod < gods.size(); iGod++){
+        int godNumber = 0;
+        for ( IGod god : gods){
             
             int partWidth = (size.getWidth()+gods.size()-1) / gods.size();
             int partHeight = size.getHeight();
             
             for(int iX = 0; iX < partWidth; iX++){
                  for( int iY =0; iY < partHeight; iY++){
-                    access[iY][iX+iGod*(partWidth-size.getWidth()%gods.size())].add(gods.get(iGod));
+                    int iPartX = iX+godNumber*(partWidth-size.getWidth()%gods.size());
+                    access[iY][iPartX].add(god);
                 }
             }
+            godNumber ++;
         }
     }
     
-    public boolean[][] geCellAcsessForGod(God god){
+    public boolean[][] geCellAcsessForGod(IGod god){
         boolean isHaveAcsess [][] = new boolean[size.getWidth()][size.getHeight()];
         for(int iX = 0; iX < size.getWidth(); iX++){
             for( int iY = 0; iY < size.getHeight(); iY++){
@@ -134,8 +138,8 @@ public class Field {
             this.size = size;
             return this;
         }
-        private ArrayList<God> gods = new ArrayList<God>();
-        public FieldBuilder setGods(ArrayList<God> gods ){
+        private Collection<? extends IGod> gods = new ArrayList<>();
+        public FieldBuilder setGods(Collection<? extends IGod> gods ){
             this.gods = gods;
             return this;
         }

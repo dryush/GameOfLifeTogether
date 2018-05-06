@@ -9,7 +9,7 @@ package gameoflife.model;
  *
  * @author dryush
  */
-public class God {
+public class God implements IGod{
     
     private Colony colony;
     public Colony getColony(){
@@ -29,7 +29,7 @@ public class God {
         actionsCount++;
     }
     private void decrimentActions(){
-        if ( actionsCount >= 0){
+        if ( actionsCount > 0){
             actionsCount--;
         }else {
             throw new RuntimeException("Попытка сделать действие, уводящее кол-во действий в минус");
@@ -42,12 +42,14 @@ public class God {
     private void createCreature(Cell c){      
         Creature cellCreature = c.getCreature();
         if ( cellCreature == null){
+            decrimentActions();
             Creature newCreature = new Creature(c, colony);
             c.setCreature(newCreature);
-            decrimentActions();
+            
         } else if ( cellCreature.getLiveStage() == Creature.LiveStage.DIE){
-            cellCreature.setLiveStage(Creature.LiveStage.LIVE);
             incrementActions();
+            cellCreature.setLiveStage(Creature.LiveStage.LIVE);
+            
         } else {
             throw new RuntimeException("Нельзя поставить существо на место другого живого существа");
         }
@@ -59,13 +61,16 @@ public class God {
         if ( cellCreature == null){
             throw new RuntimeException("Нельзя убить существо в пустой клетке");
         } else if ( cellCreature.getLiveStage() == Creature.LiveStage.BIRTH){
+            incrementActions();
+            
             cellCreature.setLiveStage(Creature.LiveStage.DIE);
             cellCreature.endEpoch();
             
-            decrimentActions();
+            
         } else if ( cellCreature.getLiveStage() == Creature.LiveStage.LIVE){
+            decrimentActions();
             cellCreature.setLiveStage(Creature.LiveStage.DIE);
-            incrementActions();
+            
         } else if ( cellCreature.getLiveStage() == Creature.LiveStage.DIE){
             throw new RuntimeException("То, что мертво - умереть не может!");
         }

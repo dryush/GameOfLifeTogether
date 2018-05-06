@@ -6,6 +6,8 @@
 package gameoflife.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  *
@@ -19,14 +21,14 @@ public class GameSession {
     private GameStage_Development _developmentStage = null;
     private GameStage_GameOverCheck _checkGameOverStage = null;
     
-    public GameSession(Field f, ArrayList<God> gods, int epochCount, int actionCount) {
+    public GameSession(Field f, Collection<God> gods, int epochCount) {
         
         ArrayList<Colony> colonies = new ArrayList<>();
         for ( God god : gods){
             colonies.add(god.getColony());
         }
         _developmentStage = new GameStage_Development(epochCount, colonies);
-        _playersMoveStage = new GameStage_PlayerMoves( gods, actionCount);
+        _playersMoveStage = new GameStage_PlayerMoves( gods);
         _checkGameOverStage = new GameStage_GameOverCheck(gods);
     }
        
@@ -76,43 +78,46 @@ public class GameSession {
     
     public class GameStage_PlayerMoves{
 
-        private ArrayList<God> gods;
-        private int actionsCount = 0;
+        private Collection<God> gods;
+        private int actionsCount = 1;
         
-        GameStage_PlayerMoves(ArrayList<God> gods, int actionsCount){;
+        GameStage_PlayerMoves(Collection <God> gods){;
             this.gods = gods;
-            this.actionsCount = actionsCount;
         }
         public int getActionsCount(){
             return actionsCount;
         }
+        public void setActionsCount( int actionsCount){
+            this.actionsCount = actionsCount;
+        }
         
-        private static final int BEFORE_FIRST = 0;
-        private int iCurrentGod = BEFORE_FIRST;
-        
+        private Iterator<God> iCurrentGod = null;
+        private God currentGod = null;
         public God startStage(){
-            iCurrentGod = 0;
+            iCurrentGod = gods.iterator();
+            currentGod = iCurrentGod.next();
             return startGodMove();
         }
         
         public God startGodMove(){
-            God god = gods.get(iCurrentGod);
-            god.setActionsCount(actionsCount);
-            
-            return god;
+            currentGod.setActionsCount(actionsCount);
+            return currentGod;
         }
         
         public void endGodMove(){
-            gods.get(iCurrentGod).getColony().getCreatures().forEach((c) -> c.endEpoch());
-            iCurrentGod++;
+            currentGod.getColony().getCreatures().forEach((c) -> c.endEpoch());
+            if ( iCurrentGod.hasNext())
+                currentGod = iCurrentGod.next();
+            else
+                currentGod = null;
         } 
         
         public boolean isAllMoved(){
-            return iCurrentGod+1 > gods.size();
+            return currentGod == null;
         }
         
         public void  doPLayerAction(Cell cell){
-            gods.get(iCurrentGod).doAction(cell);
+            currentGod.doAction(cell);
         }
     }
     
@@ -126,8 +131,8 @@ public class GameSession {
 
         private God winner = null;
         
-        private ArrayList<God> gods;
-        public GameStage_GameOverCheck(ArrayList<God> gods){
+        private Collection<God> gods;
+        public GameStage_GameOverCheck(Collection <God> gods){
             this.gods = gods;
         }
         
