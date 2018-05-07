@@ -63,7 +63,9 @@ public class GameOfLifePanel extends javax.swing.JFrame {
         endMoveButton.setEnabled(true);
     }
     
-    
+    private void setEnableEndMoveBtn(boolean enable){
+        endMoveButton.setEnabled(enable);
+    }
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -245,7 +247,8 @@ public class GameOfLifePanel extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void startNewGame_menuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startNewGame_menuItemActionPerformed
-       gameInitDialog.setVisible(true);
+        gameInitDialog = new GameInitDialog(this);
+        gameInitDialog.setVisible(true);
        SessionParams params = gameInitDialog.getSessionParams();
        if ( params != null){
            initGameLoop(params);
@@ -320,10 +323,12 @@ public class GameOfLifePanel extends javax.swing.JFrame {
             GameOfLifePanel.this.setCurrentActionsCountInfo( curGod.getActionsCount());
             
             fieldView.setEnabledFor(curGod);
+            GameOfLifePanel.this.setEnableEndMoveBtn(true);
             
         }
         
         private void startNextGodMove(){
+            GameOfLifePanel.this.setEnableEndMoveBtn(true);
             curGod = playersStage.startGodMove();
             Players.PlayerParameters curPlayerParams = sessionParams.getPlayers().getPlayerParameters(curGod);
             GameOfLifePanel.this.setCurrentPlayerInfo(curPlayerParams);
@@ -333,6 +338,7 @@ public class GameOfLifePanel extends javax.swing.JFrame {
         }
         
         public void onMoveEnded(){
+            GameOfLifePanel.this.setEnableEndMoveBtn(false);
             fieldView.setEnabled(false);
             playersStage.endGodMove();
             if( !playersStage.isAllMoved() ){
@@ -350,8 +356,10 @@ public class GameOfLifePanel extends javax.swing.JFrame {
                 
                 GameSession.GameStatus gameStatus = gameOverCheckStage.checkGameStatus();
                 if ( gameStatus == GameSession.GameStatus.DRAW){
+                    GameOfLifePanel.this.setEnableEndMoveBtn(false);
                     JOptionPane.showMessageDialog(GameOfLifePanel.this, "Ничья", "Конец игры", JOptionPane.INFORMATION_MESSAGE);
                 } else if ( gameStatus == GameSession.GameStatus.WIN){
+                    GameOfLifePanel.this.setEnableEndMoveBtn(false);
                     God winner = gameOverCheckStage.getWinner();
                     Players.PlayerParameters winnerParams = sessionParams.getPlayerParams(winner);
                     JOptionPane.showMessageDialog(GameOfLifePanel.this, "Победитель:" + winnerParams.getName() + " -\\_o/-", "Конец игры", JOptionPane.INFORMATION_MESSAGE);

@@ -81,8 +81,20 @@ public class CellView extends javax.swing.JPanel {
     
     
     public void setEnabledStatusFor(God god){
-        if (godsWithAccesse.contains(god)){
-            setEnabled();
+        boolean isGod = god != null;
+        if ( isGod){
+        
+            boolean isGodCell = godsWithAccesse.contains(god);
+            boolean isCreature = cell!= null && cell.getCreature() != null;
+
+            boolean isGodCreature = isCreature && cell.getCreature().getColony() == god.getColony();
+
+            if (isGodCell && ((!isCreature) || (isGodCreature)) ){
+
+                setEnabled();
+            } else {
+                setDisabled();
+            }
         } else {
             setDisabled();
         }

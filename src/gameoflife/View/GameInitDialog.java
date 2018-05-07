@@ -311,12 +311,13 @@ public class GameInitDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
+        sessionParams = null;
         setVisible(false); 
         dispose();
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     private String errorMessage = ""; 
-    private SessionParams sessionParams = new SessionParams();
+    private SessionParams sessionParams = null;
     private SessionParams tryCollectSessionParams(){
        boolean isAllInputsCorrect = true;
        SessionParams sp = new SessionParams();
