@@ -8,7 +8,6 @@ package gameoflife.View;
 import gameoflife.model.Colony;
 import gameoflife.model.Creature;
 import gameoflife.model.God;
-import gameoflife.model.IGod;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,11 +31,11 @@ public class GameColors {
         return instance;
     }
     
-    HashMap<IGod, Color> cellColors = new HashMap<>();
-    public Color getCellColor(IGod god){
+    HashMap<God, Color> cellColors = new HashMap<>();
+    public Color getCellColor(God god){
         return cellColors.getOrDefault(god, Color.BLUE);
     }
-    public void setCellColor(IGod god, Color color){
+    public void setCellColor(God god, Color color){
         cellColors.put(god, color);
     }
     
@@ -72,7 +71,7 @@ public class GameColors {
         }
     }
     
-    private Set<IGod> getGods(){
+    private Set<God> getGods(){
         return cellColors.keySet();
     }
     

@@ -8,7 +8,6 @@ package gameoflife.View;
 import gameoflife.model.Cell;
 import gameoflife.model.Colony;
 import gameoflife.model.God;
-import gameoflife.model.IGod;
 import java.awt.Color;
 import java.util.Collection;
 import java.util.HashMap;

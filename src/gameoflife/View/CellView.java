@@ -9,7 +9,6 @@ import gameoflife.model.Cell;
 import gameoflife.model.Creature;
 import gameoflife.model.God;
 import gameoflife.model.ICellListener;
-import gameoflife.model.IGod;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ public class CellView extends javax.swing.JPanel {
      */
     
     private CellView.CellListener cellListener = new CellView.CellListener();
-    private ArrayList<IGod> godsWithAccesse = new ArrayList<>();
+    private ArrayList<God> godsWithAccesse = new ArrayList<>();
     private Cell cell = null;
     
     private void setCell(Cell cell){
@@ -57,12 +56,12 @@ public class CellView extends javax.swing.JPanel {
         painter.initPaint();
     }
     
-    public void addAccesse(IGod god){
+    public void addAccesse(God god){
         godsWithAccesse.add(god);
     }
     
-    public void addAccesse(Collection< ? extends IGod > gods){
-        for (IGod god : gods){
+    public void addAccesse(Collection< ? extends God > gods){
+        for (God god : gods){
             addAccesse(god);
         }
     }
