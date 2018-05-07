@@ -5,6 +5,7 @@
  */
 package gameoflife.View;
 
+import Infrastructure.Size;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.util.ArrayList;
@@ -36,6 +37,8 @@ public class GameInitDialog extends javax.swing.JDialog {
         firstMoveActionsCountSpinner.getModel().setValue(10);
         actionsCountSpinner.getModel().setValue(5);
         epochCountSpinner.getModel().setValue(2);
+        xSizeSpinner.getModel().setValue(20);
+        ySizeSpinner.getModel().setValue(20);
 //        firstMoveActionsCountSpinner.setEnabled(true);
 //        firstMoveActionsCountSpinner.getEditor().setEnabled(true);
 //        actionsCountSpinner.setEnabled(true);
@@ -80,6 +83,9 @@ public class GameInitDialog extends javax.swing.JDialog {
         ChoseColorSecondPlayerButton = new javax.swing.JButton();
         jLabel8 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        ySizeSpinner = new javax.swing.JSpinner();
+        xSizeSpinner = new javax.swing.JSpinner();
 
         jLabel1.setText("Настройки игровой сессии");
 
@@ -211,6 +217,8 @@ public class GameInitDialog extends javax.swing.JDialog {
 
         jLabel10.setForeground(new java.awt.Color(180, 10, 10));
 
+        jLabel11.setText("Размеры поля");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -237,16 +245,22 @@ public class GameInitDialog extends javax.swing.JDialog {
                         .addComponent(cancelButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(startButton))
+                    .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel4)
                             .addComponent(jLabel3)
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jLabel11)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(xSizeSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(ySizeSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -273,7 +287,13 @@ public class GameInitDialog extends javax.swing.JDialog {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(fieldShapeList, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel11)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(ySizeSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(xSizeSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -336,10 +356,15 @@ public class GameInitDialog extends javax.swing.JDialog {
        int firstMoveActions = (int) firstMoveActionsCountSpinner.getModel().getValue();
        int moveActions = (int) actionsCountSpinner.getModel().getValue();
        
+       int wSize = (int) xSizeSpinner.getValue();
+       int hSize = (int) ySizeSpinner.getValue();
+       
+       
        sp.setEpochCount(epochCount);
        sp.setFirstMoveActionsCount(firstMoveActions);
        sp.setMoveActionsCount(moveActions);
        
+       sp.setFieldSize(new Size(wSize, hSize));
        sp.setFieldShapeParams((SessionParams.FieldShapeParams) fieldShapeList.getModel().getSelectedItem());
        
        return sp;
@@ -413,6 +438,8 @@ public class GameInitDialog extends javax.swing.JDialog {
         epochCountSpinner.setModel( new PositiveIntSM());
         firstMoveActionsCountSpinner.setModel( new PositiveIntSM());
         actionsCountSpinner.setModel(new PositiveIntSM());
+        xSizeSpinner.setModel(new PositiveIntSM());
+        ySizeSpinner.setModel(new PositiveIntSM());
         
     }
     
@@ -465,6 +492,7 @@ public class GameInitDialog extends javax.swing.JDialog {
     private javax.swing.JColorChooser jColorChooser1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -481,5 +509,7 @@ public class GameInitDialog extends javax.swing.JDialog {
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JTextField secondPlayerName;
     private javax.swing.JButton startButton;
+    private javax.swing.JSpinner xSizeSpinner;
+    private javax.swing.JSpinner ySizeSpinner;
     // End of variables declaration//GEN-END:variables
 }
