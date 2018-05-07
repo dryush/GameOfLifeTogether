@@ -15,8 +15,6 @@ public class Cell {
     private Creature creature = null;
     private ArrayList<Cell> nearbyCells = new ArrayList<>();
     
-    ///Только для дебага
-    public int x, y; 
     
     public Cell(){
     }

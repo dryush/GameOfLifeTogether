@@ -76,8 +76,6 @@ public class Field {
         for ( int iY = 0 ; iY < size.getHeight(); iY++){
             for (int iX = 0; iX < size.getWidth(); iX++){
                 cells[iY][iX] = new Cell();
-                cells[iY][iX].x = iX;
-                cells[iY][iX].y = iY;
             }
         }
     }
@@ -99,8 +97,6 @@ public class Field {
             for ( int iCellX = 0; iCellX < size.getWidth(); iCellX++){    
                 for ( int iCellY = 0; iCellY < size.getHeight(); iCellY++ ){
                     field.cells[iCellY][iCellX] = new Cell();
-                    field.cells[iCellY][iCellX].x = iCellX;
-                    field.cells[iCellY][iCellX].y = iCellY;
                 }
             }
             
@@ -152,14 +148,6 @@ public class Field {
         protected void setCells(Field field) {
             Size size = field.size;
             
-            
-                System.out.println("");
-            for (int i =0; i < size.getWidth(); i++){
-                for ( int j = 0; j < size.getHeight(); j++){
-                    System.out.print( field.cells[j][i] == null ? "." : "8");
-                }
-                System.out.println("");
-            }
             //Левый верхний треугольник
             {
                 int ws = 0;
@@ -171,8 +159,6 @@ public class Field {
 
                         if ( we - iCellX - 1< (double)we/he*iCellY ){
                             field.cells[iCellY][iCellX] = new Cell();
-                            field.cells[iCellY][iCellX].x = iCellX;
-                            field.cells[iCellY][iCellX].y = iCellY;
                         }
                         else {
                             field.cells[iCellY][iCellX] = null;
@@ -181,14 +167,6 @@ public class Field {
                 }
             }
             
-            
-                System.out.println("");
-            for (int i =0; i < size.getWidth(); i++){
-                for ( int j = 0; j < size.getHeight(); j++){
-                    System.out.print( field.cells[j][i] == null ? "." : "8");
-                }
-                System.out.println("");
-            }
             
             //Правый верхний треугольник
             {
@@ -201,8 +179,6 @@ public class Field {
 
                         if ( iCellX -ws  < (double)(we-ws)/(he-hs)*(iCellY-hs) ){
                             field.cells[iCellY][iCellX] = new Cell();
-                            field.cells[iCellY][iCellX].x = iCellX;
-                            field.cells[iCellY][iCellX].y = iCellY;
                         }
                         else {
                             field.cells[iCellY][iCellX] = null;
@@ -211,14 +187,6 @@ public class Field {
                 }
             }
             
-            
-                System.out.println("");
-            for (int i =0; i < size.getWidth(); i++){
-                for ( int j = 0; j < size.getHeight(); j++){
-                    System.out.print( field.cells[j][i] == null ? "." : "8");
-                }
-                System.out.println("");
-            }
             
             //Левый нижний треугольник
             {
@@ -231,8 +199,6 @@ public class Field {
 
                         if ( iCellX - ws > (double)(we-ws)/(he-hs)*(iCellY-hs) ){
                             field.cells[iCellY][iCellX] = new Cell();
-                            field.cells[iCellY][iCellX].x = iCellX;
-                            field.cells[iCellY][iCellX].y = iCellY;
                         }
                         else {
                             field.cells[iCellY][iCellX] = null;
@@ -242,13 +208,6 @@ public class Field {
             }
             
             
-                System.out.println("");
-            for (int i =0; i < size.getWidth(); i++){
-                for ( int j = 0; j < size.getHeight(); j++){
-                    System.out.print( field.cells[j][i] == null ? "." : "8");
-                }
-                System.out.println("");
-            }
             
             //Правый нижний треугольник
             {
@@ -261,8 +220,6 @@ public class Field {
 
                         if ( we - iCellX - 1 > (double)(we-ws)/(he-hs)*(iCellY-hs) ){
                             field.cells[iCellY][iCellX] = new Cell();
-                            field.cells[iCellY][iCellX].x = iCellX;
-                            field.cells[iCellY][iCellX].y = iCellY;
                         }
                         else {
                             field.cells[iCellY][iCellX] = null;
@@ -271,14 +228,6 @@ public class Field {
                 }
             }
             
-            
-                System.out.println("");
-            for (int i =0; i < size.getWidth(); i++){
-                for ( int j = 0; j < size.getHeight(); j++){
-                    System.out.print( field.cells[j][i] == null ? "." : "8");
-                }
-                System.out.println("");
-            }
             
         }
 

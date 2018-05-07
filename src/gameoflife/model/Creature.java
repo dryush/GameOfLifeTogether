@@ -85,20 +85,14 @@ public class Creature {
     }
     
     private void initSpawning(Cell cell){
-        System.out.println("Я существо в x: " + this.cell.x + " y: " + this.cell.y);
-        System.out.println("Инициирую зарождение в x: " + cell.x + " y: " + cell.y);
-        
         HashMap<Colony,ArrayList<Creature>> spawnedCreatures = new HashMap<>();
         HashMap<Colony, Integer> spawnedCreaturesCount = new HashMap<>();
         //Для каждой соседней клетки, отсноительно текущей
         //ArrayList<Cell> nearbyCells = cell.getNearbyCells();
         for (Creature  nearbyCreature : cell.getNearbyCreatures()){
             //Если в ней есть существо
-            //System.out.println("\tИщу существо в x: " + nearbyCell.x + " y: " + nearbyCell.y);
             if ( nearbyCreature.isLive()){
-            //System.out.println("\t Нашел существо в x: "+  cellCreature.cell.x + " y: " + cellCreature.cell.y);
                 //оно пробует размножиться в текущую
-                System.out.println("\t\t Предлагаю ему размножиться в x: " + cell.x + " y: " + cell.y);
                 Creature spawnedCreature = nearbyCreature.trySpawnCreature(cell);
                 if (spawnedCreature != null){
                         ArrayList curColonyCreature = spawnedCreatures.getOrDefault(spawnedCreature.colony, new ArrayList<>());
@@ -134,32 +128,21 @@ public class Creature {
         Creature creature = null;
         int neighborsCount = 0;
         ArrayList<Cell> nearbyCells = cell.getNearbyCells();
-        ArrayList<Cell> cellsWithCreatures = new ArrayList<>();
         //Считаю соседей клетки, (в том числе себя)
         for ( Cell c : nearbyCells ){
             if (c.getCreature() != null && ( c.getCreature().getLiveStage() == LiveStage.LIVE || 
                     c.getCreature().getLiveStage() == LiveStage.DIE ) ){
                 neighborsCount++;
-                cellsWithCreatures.add(c);
             }
         }
-        //if ( neighborsCount >= 3){
         
-        System.out.println("\t\t Я существо в x: " + this.cell.x + " y: "+this.cell.y);     
-        System.out.println("\t\t\t пытаюсь породить в x: " + cell.x + " y: " + cell.y);
-        
-        
-        for ( int i = 0; i < cellsWithCreatures.size(); i++){
-            System.out.println("\t\t\t\t нашёл соседей в x: " + cellsWithCreatures.get(i).x +" y: " + cellsWithCreatures.get(i).y);
-        }
         
         
         //Должно родиться, если 3
+        
+        //if ( neighborsCount >= 3){
         if ( neighborsCount == 3){
-            System.out.println("\t\t\tПородился");
             creature = new Creature(cell, colony);
-        } else {
-            System.out.println("\t\t\tНе удача");
         }
         return creature;
     }
