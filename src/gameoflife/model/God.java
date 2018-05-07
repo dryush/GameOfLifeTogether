@@ -9,7 +9,7 @@ package gameoflife.model;
  *
  * @author dryush
  */
-public class God implements IGod{
+public class God {
     
     private Colony colony;
     public Colony getColony(){

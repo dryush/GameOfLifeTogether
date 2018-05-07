@@ -23,19 +23,19 @@ public class Field {
     public Size getSize(){
         return size;
     }
-    private ArrayList<IGod>[][] access = new ArrayList[0][0];
+    private ArrayList<God>[][] access = new ArrayList[0][0];
     
-    public ArrayList<IGod>[][] getCellsAccesses (){
-        ArrayList<IGod>[][] accesseCopy = new ArrayList[size.getHeight()][size.getWidth()];
+    public ArrayList<God>[][] getCellsAccesses (){
+        ArrayList<God>[][] accesseCopy = new ArrayList[size.getHeight()][size.getWidth()];
         for (int iX = 0; iX < size.getWidth(); iX++){
             for( int iY = 0; iY < size.getHeight(); iY++){
-                accesseCopy[iY][iX] = (ArrayList<IGod>) access[iY][iX].clone();
+                accesseCopy[iY][iX] = (ArrayList<God>) access[iY][iX].clone();
             }
         }
         return accesseCopy;
     }
     
-    private void allocateCells(Collection<? extends IGod> gods){
+    private void allocateCells(Collection<? extends God> gods){
         access = new ArrayList[size.getHeight()][size.getWidth()];
         for (int iX = 0; iX < size.getWidth(); iX++){
             for( int iY = 0; iY < size.getHeight(); iY++){
@@ -44,7 +44,7 @@ public class Field {
         }
         
         int godNumber = 0;
-        for ( IGod god : gods){
+        for ( God god : gods){
             
             int partWidth = (size.getWidth()+gods.size()-1) / gods.size();
             int partHeight = size.getHeight();
@@ -59,7 +59,7 @@ public class Field {
         }
     }
     
-    public boolean[][] geCellAcsessForGod(IGod god){
+    public boolean[][] geCellAcsessForGod(God god){
         boolean isHaveAcsess [][] = new boolean[size.getWidth()][size.getHeight()];
         for(int iX = 0; iX < size.getWidth(); iX++){
             for( int iY = 0; iY < size.getHeight(); iY++){
@@ -314,8 +314,8 @@ public class Field {
             this.size = size;
             return this;
         }
-        private Collection<? extends IGod> gods = new ArrayList<>();
-        public FieldBuilder setGods(Collection<? extends IGod> gods ){
+        private Collection<? extends God> gods = new ArrayList<>();
+        public FieldBuilder setGods(Collection<? extends God> gods ){
             this.gods = gods;
             return this;
         }

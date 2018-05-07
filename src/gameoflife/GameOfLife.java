@@ -24,7 +24,6 @@ import java.util.ArrayList;
 
 import Infrastructure.*;
 import gameoflife.View.FieldView;
-import gameoflife.View.GameColors;
 import gameoflife.View.GameInitDialog;
 import gameoflife.View.GameOfLifePanel;
 import gameoflife.View.IFieldViewListener;
