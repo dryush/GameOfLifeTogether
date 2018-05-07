@@ -33,10 +33,17 @@ public class CellView extends javax.swing.JPanel {
     private CellView.CellListener cellListener = new CellView.CellListener();
     private ArrayList<IGod> godsWithAccesse = new ArrayList<>();
     private Cell cell = null;
+    
     private void setCell(Cell cell){
         this.cell = cell;
-        this.cell.addListener(cellListener);
+        if (cell != null){
+            this.cell.addListener(cellListener);
+        } else {
+            this.cellButton.setVisible(false);
+            this.remove(cellButton);
+        }
     }
+    
     
     public Cell getCell(){
         return cell;
@@ -153,14 +160,17 @@ public class CellView extends javax.swing.JPanel {
         
         private void initPaint(){
             
-            deffaultColor = CellView.this.cellButton.getBackground();
+            if (CellView.this.cellButton != null){
+                deffaultColor = CellView.this.cellButton.getBackground();
+            }
+            
             
             Dimension dim = new Dimension(25,25);
             CellView.this.setSize(dim);
             CellView.this.setPreferredSize(dim);
             CellView.this.setMinimumSize(dim);
             CellView.this.setMaximumSize(dim);
-            
+            CellView.this.setBackground(Color.BLACK);
             CellView.this.cellButton.setBackground(deffaultColor);
             
             //CellView.this.setBorder(new BasicBorders.ButtonBorder(Color.WHITE, Color.black, Color.black, Color.black));

@@ -28,7 +28,7 @@ public class SessionParams {
     public static ArrayList<FieldShapeParams> getFieldShapeNames(){
        ArrayList<FieldShapeParams> shapes = new ArrayList<>();
        shapes.add(new FieldShapeParams("plane_sphere", "Плоская сфера" , new Field.FlatSphere()));
-       shapes.add(new FieldShapeParams("romb", "Ромб" , new Field.FlatSphere()));
+       shapes.add(new FieldShapeParams("romb", "Ромб" , new Field.Romb()));
        return shapes;
     }
     

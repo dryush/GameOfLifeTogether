@@ -83,10 +83,29 @@ public class Field {
     }
     
     public static abstract class FieldShape{
+        abstract protected void setCells(Field field);
         abstract protected void setNearbyCells(Field field);
+        final public void set(Field field){
+            setCells(field);
+            setNearbyCells(field);
+        }
     }
     
     public static class FlatSphere extends FieldShape{
+        
+        @Override
+        protected void setCells(Field field) {
+            Size size = field.size;
+            for ( int iCellX = 0; iCellX < size.getWidth(); iCellX++){    
+                for ( int iCellY = 0; iCellY < size.getHeight(); iCellY++ ){
+                    field.cells[iCellY][iCellX] = new Cell();
+                    field.cells[iCellY][iCellX].x = iCellX;
+                    field.cells[iCellY][iCellX].y = iCellY;
+                }
+            }
+            
+        }
+        
         @Override
         protected void setNearbyCells(Field f) {
             Size size = f.size;
@@ -127,6 +146,214 @@ public class Field {
         }
     }
     
+    public static class Romb extends FieldShape{
+
+         @Override
+        protected void setCells(Field field) {
+            Size size = field.size;
+            
+            
+                System.out.println("");
+            for (int i =0; i < size.getWidth(); i++){
+                for ( int j = 0; j < size.getHeight(); j++){
+                    System.out.print( field.cells[j][i] == null ? "." : "8");
+                }
+                System.out.println("");
+            }
+            //Левый верхний треугольник
+            {
+                int ws = 0;
+                int we = size.getWidth() / 2;
+                int hs = 0;
+                int he = size.getHeight() /2;
+                for ( int iCellX = ws; iCellX < we; iCellX++){    
+                    for ( int iCellY = hs; iCellY < he; iCellY++ ){
+
+                        if ( we - iCellX - 1< (double)we/he*iCellY ){
+                            field.cells[iCellY][iCellX] = new Cell();
+                            field.cells[iCellY][iCellX].x = iCellX;
+                            field.cells[iCellY][iCellX].y = iCellY;
+                        }
+                        else {
+                            field.cells[iCellY][iCellX] = null;
+                        }
+                    }
+                }
+            }
+            
+            
+                System.out.println("");
+            for (int i =0; i < size.getWidth(); i++){
+                for ( int j = 0; j < size.getHeight(); j++){
+                    System.out.print( field.cells[j][i] == null ? "." : "8");
+                }
+                System.out.println("");
+            }
+            
+            //Правый верхний треугольник
+            {
+                int ws = (size.getWidth()) / 2 ;
+                int we = size.getWidth();
+                int hs = 0;
+                int he = (size.getHeight())/2;
+                for ( int iCellX = ws; iCellX < we; iCellX++){    
+                    for ( int iCellY = hs; iCellY < he; iCellY++ ){
+
+                        if ( iCellX -ws  < (double)(we-ws)/(he-hs)*(iCellY-hs) ){
+                            field.cells[iCellY][iCellX] = new Cell();
+                            field.cells[iCellY][iCellX].x = iCellX;
+                            field.cells[iCellY][iCellX].y = iCellY;
+                        }
+                        else {
+                            field.cells[iCellY][iCellX] = null;
+                        }
+                    }
+                }
+            }
+            
+            
+                System.out.println("");
+            for (int i =0; i < size.getWidth(); i++){
+                for ( int j = 0; j < size.getHeight(); j++){
+                    System.out.print( field.cells[j][i] == null ? "." : "8");
+                }
+                System.out.println("");
+            }
+            
+            //Левый нижний треугольник
+            {
+                int ws = 0;
+                int we = size.getWidth() / 2;
+                int hs = (size.getHeight()) / 2;
+                int he = size.getHeight();
+                for ( int iCellX = ws; iCellX < we; iCellX++){    
+                    for ( int iCellY = hs; iCellY < he; iCellY++ ){
+
+                        if ( iCellX - ws > (double)(we-ws)/(he-hs)*(iCellY-hs) ){
+                            field.cells[iCellY][iCellX] = new Cell();
+                            field.cells[iCellY][iCellX].x = iCellX;
+                            field.cells[iCellY][iCellX].y = iCellY;
+                        }
+                        else {
+                            field.cells[iCellY][iCellX] = null;
+                        }
+                    }
+                }
+            }
+            
+            
+                System.out.println("");
+            for (int i =0; i < size.getWidth(); i++){
+                for ( int j = 0; j < size.getHeight(); j++){
+                    System.out.print( field.cells[j][i] == null ? "." : "8");
+                }
+                System.out.println("");
+            }
+            
+            //Правый нижний треугольник
+            {
+                int ws = size.getWidth()/ 2;
+                int we = size.getWidth();
+                int hs = (size.getHeight())/2;
+                int he = size.getHeight();
+                for ( int iCellX = ws; iCellX < we; iCellX++){    
+                    for ( int iCellY = hs; iCellY < he; iCellY++ ){
+
+                        if ( we - iCellX - 1 > (double)(we-ws)/(he-hs)*(iCellY-hs) ){
+                            field.cells[iCellY][iCellX] = new Cell();
+                            field.cells[iCellY][iCellX].x = iCellX;
+                            field.cells[iCellY][iCellX].y = iCellY;
+                        }
+                        else {
+                            field.cells[iCellY][iCellX] = null;
+                        }
+                    }
+                }
+            }
+            
+            
+                System.out.println("");
+            for (int i =0; i < size.getWidth(); i++){
+                for ( int j = 0; j < size.getHeight(); j++){
+                    System.out.print( field.cells[j][i] == null ? "." : "8");
+                }
+                System.out.println("");
+            }
+            
+        }
+
+        @Override
+        protected void setNearbyCells(Field field) {
+            
+            Size size = field.getSize();
+            
+            for ( int iCellX = 0; iCellX < size.getWidth(); iCellX++){
+                
+                for ( int iCellY = 0; iCellY < size.getHeight(); iCellY++ ){
+                    if ( field.cells[iCellY][iCellX] != null){
+                        ArrayList<Cell> nearbyCells = new ArrayList<Cell>();
+                        if ( iCellX > 0 && iCellY > 0){
+                            Cell ncell = field.cells[iCellY-1][iCellX-1];
+                            if (ncell != null){
+                                nearbyCells.add(ncell);
+                            }
+                        }
+                        if ( iCellX > 0 ){
+                            Cell ncell = field.cells[iCellY][iCellX-1];
+                            if (ncell != null){
+                                nearbyCells.add(ncell);
+                            }
+                        }
+                        if ( iCellX > 0 && iCellY + 1 < size.getHeight()){
+                            Cell ncell = field.cells[iCellY+1][iCellX-1];
+                            if (ncell != null){
+                                nearbyCells.add(ncell);
+                            }
+                        }
+
+                        if ( iCellX+1 < size.getWidth() && iCellY > 0){
+                            Cell ncell = field.cells[iCellY-1][iCellX+1];
+                            if (ncell != null){
+                                nearbyCells.add(ncell);
+                            }
+                        }
+                        if ( iCellX+1 < size.getWidth()){
+                            Cell ncell = field.cells[iCellY][iCellX+1];
+                            if (ncell != null){
+                                nearbyCells.add(ncell);
+                            }
+                        }
+
+                        if ( iCellX+1 < size.getWidth() && iCellY+1 < size.getHeight()){
+                            Cell ncell = field.cells[iCellY+1][iCellX+1];
+                            if (ncell != null){
+                                nearbyCells.add(ncell);
+                            }
+                        }
+
+                        if ( iCellY > 0){
+                            Cell ncell = field.cells[iCellY-1][iCellX];
+                            if (ncell != null){
+                                nearbyCells.add(ncell);
+                            }
+                        }
+                        if ( iCellY + 1 < size.getHeight()){
+                            Cell ncell = field.cells[iCellY+1][iCellX];
+                            if (ncell != null){
+                                nearbyCells.add(ncell);
+                            }
+                        }
+
+                        field.cells[iCellY][iCellX].setNearbyCells(nearbyCells);
+                    }
+                }
+                
+            }
+            
+        }
+        
+    }
+    
     public static class FieldBuilder{
         private FieldShape shape = new FlatSphere();
         public FieldBuilder setShape(FieldShape shape){
@@ -145,7 +372,7 @@ public class Field {
         }
         public Field build(){
             Field f = new Field(size);
-            shape.setNearbyCells(f);
+            shape.set(f);
             f.allocateCells(gods);
             
             return f;

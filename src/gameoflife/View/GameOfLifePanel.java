@@ -258,7 +258,7 @@ public class GameOfLifePanel extends javax.swing.JFrame {
         gameLoop.onMoveEnded();
     }//GEN-LAST:event_endMoveButtonActionPerformed
 
-    private void setCurrentPLayerInfo(Players.PlayerParameters p){
+    private void setCurrentPlayerInfo(Players.PlayerParameters p){
         playerNameLabel.setText( p.getName());
         playerColor.setBackground(p.getColor());
     }
@@ -315,8 +315,8 @@ public class GameOfLifePanel extends javax.swing.JFrame {
             }
             
             curGod = playersStage.startStage();
-            Players.PlayerParameters curPlayerParams = sessionParams.getPlayerParams(curGod);
-            GameOfLifePanel.this.setCurrentPLayerInfo(curPlayerParams);
+            Players.PlayerParameters curPlayerParams = sessionParams.getPlayers().getPlayerParameters(curGod);
+            GameOfLifePanel.this.setCurrentPlayerInfo(curPlayerParams);
             GameOfLifePanel.this.setCurrentActionsCountInfo( curGod.getActionsCount());
             
             fieldView.setEnabledFor(curGod);
@@ -325,6 +325,8 @@ public class GameOfLifePanel extends javax.swing.JFrame {
         
         private void startNextGodMove(){
             curGod = playersStage.startGodMove();
+            Players.PlayerParameters curPlayerParams = sessionParams.getPlayers().getPlayerParameters(curGod);
+            GameOfLifePanel.this.setCurrentPlayerInfo(curPlayerParams);
             GameOfLifePanel.this.setCurrentActionsCountInfo( curGod.getActionsCount() );
             fieldView.setEnabledFor(curGod);
             
