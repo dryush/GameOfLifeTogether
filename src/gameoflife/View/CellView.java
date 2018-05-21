@@ -11,6 +11,7 @@ import gameoflife.model.God;
 import gameoflife.model.ICellListener;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -90,7 +91,6 @@ public class CellView extends javax.swing.JPanel {
             boolean isGodCreature = isCreature && cell.getCreature().getColony() == god.getColony();
 
             if (isGodCell && ((!isCreature) || (isGodCreature)) ){
-
                 setEnabled();
             } else {
                 setDisabled();
@@ -114,7 +114,7 @@ public class CellView extends javax.swing.JPanel {
 
         cellButton.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         cellButton.setForeground(new java.awt.Color(0, 0, 0));
-        cellButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        cellButton.setMargin(new java.awt.Insets(1, 1, 1, 1));
         cellButton.setMaximumSize(new java.awt.Dimension(50, 50));
         cellButton.setMinimumSize(new java.awt.Dimension(20, 20));
         cellButton.setPreferredSize(new java.awt.Dimension(50, 50));
@@ -173,10 +173,13 @@ public class CellView extends javax.swing.JPanel {
             
             if (CellView.this.cellButton != null){
                 deffaultColor = CellView.this.cellButton.getBackground();
+                CellView.this.cellButton.setMargin(new Insets(1, 1, 1, 1));
+                CellView.this.cellButton.setAlignmentX(CENTER_ALIGNMENT);
+                CellView.this.cellButton.setAlignmentY(CENTER_ALIGNMENT);
             }
             
             
-            Dimension dim = new Dimension(25,25);
+            Dimension dim = new Dimension(30,30);
             CellView.this.setSize(dim);
             CellView.this.setPreferredSize(dim);
             CellView.this.setMinimumSize(dim);
@@ -195,21 +198,23 @@ public class CellView extends javax.swing.JPanel {
     
         private void repaintWithCreature(Creature creature){
             Players.PlayerParameters playerParam = players.getPlayerParameters(creature.getColony());
-            if (creature.getLiveStage() == Creature.LiveStage.BIRTH){
-                CellView.this.cellButton.setText("+");
-                String check =  CellView.this.cellButton.getText();
-                CellView.this.cellButton.setBackground( playerParam.getColor().brighter());
-                check = check + "";
-                int stop = 0;
-            } else if ( creature.getLiveStage() == Creature.LiveStage.LIVE){
-                CellView.this.cellButton.setBackground( playerParam.getColor().darker());
-                CellView.this.cellButton.setText("");
-            } else if ( creature.getLiveStage() == Creature.LiveStage.DIE){
-                CellView.this.cellButton.setBackground( playerParam.getColor().darker().darker().darker());
-                CellView.this.cellButton.setText("-");
+            if (null != creature.getLiveStage())switch (creature.getLiveStage()) {
+                case BIRTH:
+                    CellView.this.cellButton.setText("+");
+                    CellView.this.cellButton.setBackground( playerParam.getColor().brighter());
+                    break;
+                case LIVE:
+                    CellView.this.cellButton.setBackground( playerParam.getColor().darker());
+                    CellView.this.cellButton.setText("");
+                    break;
+                case DIE:
+                    CellView.this.cellButton.setBackground( playerParam.getColor().darker().darker().darker());
+                    CellView.this.cellButton.setText("-");
+                    break;
+                default:
+                    break;
             }
             
-            //CellView.this.setBackground();
         }
     }
     

@@ -41,8 +41,7 @@ public class Creature {
     public Colony getColony(){
         return colony;
     }
-        
-    Field f = null;
+
     public Creature(Cell cell, Colony colony){
         
         this.cell = cell;

@@ -157,7 +157,7 @@ public class Field {
                 for ( int iCellX = ws; iCellX < we; iCellX++){    
                     for ( int iCellY = hs; iCellY < he; iCellY++ ){
 
-                        if ( we - iCellX - 1< (double)we/he*iCellY ){
+                        if ( we - iCellX < (double)we/he*iCellY ){
                             field.cells[iCellY][iCellX] = new Cell();
                         }
                         else {
@@ -177,7 +177,7 @@ public class Field {
                 for ( int iCellX = ws; iCellX < we; iCellX++){    
                     for ( int iCellY = hs; iCellY < he; iCellY++ ){
 
-                        if ( iCellX -ws  < (double)(we-ws)/(he-hs)*(iCellY-hs) ){
+                        if ( iCellX -ws +1 < (double)(we-ws)/(he-hs)*(iCellY-hs) ){
                             field.cells[iCellY][iCellX] = new Cell();
                         }
                         else {

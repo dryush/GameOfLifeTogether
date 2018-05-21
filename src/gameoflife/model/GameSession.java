@@ -14,35 +14,106 @@ import java.util.Iterator;
  * @author dryush
  */
 public class GameSession {
-    
-    public int playerMovesCount = 0;
-    
-    private GameStage_PlayerMoves _playersMoveStage = null;
+   
+    private GameStage_GodsMoves _playersMoveStage = null;
     private GameStage_Development _developmentStage = null;
     private GameStage_GameOverCheck _checkGameOverStage = null;
     
-    public GameSession(Field f, Collection<God> gods, int epochCount) {
+    public GameSession(Field f, Collection<God> gods, int epochCount, GodController godController) {
         
         ArrayList<Colony> colonies = new ArrayList<>();
         for ( God god : gods){
             colonies.add(god.getColony());
         }
         _developmentStage = new GameStage_Development(epochCount, colonies);
-        _playersMoveStage = new GameStage_PlayerMoves( gods);
+        _playersMoveStage = new GameStage_GodsMoves( gods, godController);
         _checkGameOverStage = new GameStage_GameOverCheck(gods);
     }
        
     
-    public GameStage_Development getGameStage_Development(){
+    private Collection<IGameSessionListener> listeners = new ArrayList<>();
+    public void addListener( IGameSessionListener listener){
+        listeners.add(listener);
+    }
+    
+    private God curGod = null;
+    public God getCurrentGod(){
+        return curGod;
+    }
+    
+    private GameStage_Development getGameStage_Development(){
         return _developmentStage;
     }
-    public GameStage_PlayerMoves getGameStage_PlayerMoves(){
+    private GameStage_GodsMoves getGameStage_PlayerMoves(){
         return _playersMoveStage;
     }
-    public GameStage_GameOverCheck getGameStage_GameOverCheck(){
+    private GameStage_GameOverCheck getGameStage_GameOverCheck(){
         return _checkGameOverStage;
     }
-    public class GameStage_Development {
+    
+    private interface GameStageListener{
+        void onStageEnd(GameStage gs);
+        void onStageStart(GameStage gs);
+    }
+    
+    private GameLoop gameLoop = new GameLoop();
+    public void start(){
+        gameLoop.start();
+    }
+    private class GameLoop implements GameStageListener{
+
+        public GameLoop(){
+        }
+        
+        private void start(){
+            getGameStage_Development().addListener(this);
+            getGameStage_GameOverCheck().addListener(this);
+            getGameStage_PlayerMoves().addListener(this);
+            
+            getGameStage_PlayerMoves().start();
+        }
+        @Override
+        public void onStageEnd(GameStage gs) {
+            GameStage next = gs.getNextStage();
+            if ( next != null){
+                next.start();
+            }
+        }
+
+        @Override
+        public void onStageStart(GameStage gs) {
+            
+        }
+        
+    }
+    
+    abstract private class GameStage{
+        Collection<GameStageListener> listeners =  new ArrayList();
+        public void addListener(GameStageListener listener){
+            listeners.add(listener);
+        }
+        protected void fireStageEnd(){
+            for ( GameStageListener l : listeners){
+                l.onStageEnd(this);
+            }
+        }
+        protected void fireStageStart(){
+            for ( GameStageListener l : listeners){
+                l.onStageStart(this);
+            }
+        }
+        
+        public void start(){
+            fireStageStart();
+        }
+        
+        protected void end(){
+            fireStageEnd();
+        }
+        abstract public GameStage getNextStage();
+    }
+    
+    private class GameStage_Development extends GameStage{
 
         private int epochCount;
         private ArrayList<Colony> colonies; 
@@ -53,7 +124,7 @@ public class GameSession {
 
         
         public void start() {
-            
+            super.start();
             for ( int i = 0; i < epochCount; i++){
                 
                 ArrayList<Colony> fixedColonies = new ArrayList<>();
@@ -73,51 +144,124 @@ public class GameSession {
                     }
                 }
             }
+            super.end();
+        }
+
+        @Override
+        public GameStage getNextStage() {
+            return GameSession.this.getGameStage_GameOverCheck();
         }
     }
     
-    public class GameStage_PlayerMoves{
+    
+    private void fireGodMovesStageStart(){
+        listeners.forEach((listener) -> {
+            listener.onGodMovesStageStarted(this);
+        });
+    }
+    
+    private void fireGodMovesStageEnd(){
+        listeners.forEach((listener) -> {
+            listener.onGodMovesStageEnded(this);
+        });
+    }
+ 
+    private void fireGodMoveStart(){
+        listeners.forEach((listener) -> {
+            listener.onGodChanged(this);
+        });
+    }
+    
+    private void fireGodMovesCountChanged(){
+        listeners.forEach((listener) -> {
+            listener.onGodMovesCountChanged(this);
+        });
+    }
+    
+    private void fireBeforeGodsMovesStarted(){
+        listeners.forEach( l -> l.onBeforeGodNovesStageStart(this));
+    }
+    
+    
+    public void setPlayerMovesCount(int count){
+        getGameStage_PlayerMoves().setActionsCount(count);
+    }
+    
+    private class GameStage_GodsMoves extends GameStage implements IGodControllerListener{
 
         private Collection<God> gods;
         private int actionsCount = 1;
+        public void setActionsCount(int count){
+            this.actionsCount = count;
+        }
+        private void setCurrentGod(God god){
+            GameSession.this.curGod = god;
+        }
+        private God getCurrentGod(){
+            return GameSession.this.getCurrentGod();
+        }
         
-        GameStage_PlayerMoves(Collection <God> gods){;
+        GameStage_GodsMoves(Collection <God> gods, GodController godController){
             this.gods = gods;
-        }
-        public int getActionsCount(){
-            return actionsCount;
-        }
-        public void setActionsCount( int actionsCount){
-            this.actionsCount = actionsCount;
+            godController.addListener(this);
         }
         
         private Iterator<God> iCurrentGod = null;
-        private God currentGod = null;
-        public God startStage(){
+        private void startStage(){
             iCurrentGod = gods.iterator();
-            currentGod = iCurrentGod.next();
-            return startGodMove();
+            setCurrentGod( iCurrentGod.next());
+            startGodMove();
         }
         
-        public God startGodMove(){
-            currentGod.setActionsCount(actionsCount);
-            return currentGod;
+        @Override
+        public void start(){
+            super.start();
+            fireBeforeGodsMovesStarted();
+            startStage();
+            fireGodMovesStageStart();
         }
         
-        public void endGodMove(){
-            currentGod.getColony().getCreatures().forEach((c) -> c.endEpoch());
+        private void startGodMove(){
+            getCurrentGod().setActionsCount(actionsCount);
+            fireGodMoveStart();
+        }
+        
+        private void endGodMove(){
+            getCurrentGod().getColony().getCreatures().forEach((c) -> c.endEpoch());
             if ( iCurrentGod.hasNext())
-                currentGod = iCurrentGod.next();
+                setCurrentGod( iCurrentGod.next());
             else
-                currentGod = null;
+                setCurrentGod( null);
         } 
         
         public boolean isAllMoved(){
-            return currentGod == null;
+            return getCurrentGod() == null;
         }
         
         public void  doPLayerAction(Cell cell){
-            currentGod.doAction(cell);
+            getCurrentGod().doAction(cell);
+            fireGodMovesCountChanged();
+        }
+        
+        @Override
+        public GameStage getNextStage() {
+            return GameSession.this.getGameStage_Development();
+        }
+
+        @Override
+        public void onGodSelectCell(Cell cell) {
+            doPLayerAction(cell);
+        }
+
+        @Override
+        public void onGodEndMove() {
+            endGodMove();
+            if ( !isAllMoved()){
+                startGodMove();
+            } else {
+                fireGodMovesStageEnd();
+                super.end();
+            }
         }
     }
     
@@ -127,10 +271,33 @@ public class GameSession {
         DRAW
     }
     
-    public class GameStage_GameOverCheck {
-
-        private God winner = null;
+    
+    private GameStatus gameStatus = GameStatus.CONTINUE;
+    public GameStatus getGameStatus(){
+        return this.gameStatus;
+    }
+    private void setGameStatus( GameStatus status){
+        this.gameStatus = status;
+    }  
+    
+    private boolean isSessionEnded(){
+        return gameStatus != GameStatus.CONTINUE;
+    }
+    
+    
+    private God winner = null;
+    public God getWinner(){
+        return winner;
+    }
+    
         
+    private void fireGameSessionOver(){
+        listeners.forEach( (l) -> l.onGameOver(this));
+    }
+    
+    
+    private class GameStage_GameOverCheck extends GameStage{
+
         private Collection<God> gods;
         public GameStage_GameOverCheck(Collection <God> gods){
             this.gods = gods;
@@ -138,9 +305,7 @@ public class GameSession {
         
         
         public GameStatus checkGameStatus() {
-            
-            GameStatus gameStatus = GameStatus.CONTINUE;    
-            
+            GameStatus gameStatus = GameStatus.CONTINUE;
             int noCreaturesGodsCount = 0;
             
             for (God god : gods){
@@ -162,11 +327,27 @@ public class GameSession {
             } else {
                 gameStatus = GameStatus.CONTINUE;
             }
+            
             return gameStatus;
         }
+
+        @Override
+        public void start(){
+            super.start();
+            setGameStatus(checkGameStatus());
+            if (isSessionEnded()){
+                fireGameSessionOver();
+            }
+            super.end();
+        }
         
-        public God getWinner(){
-            return winner;
+        @Override
+        public GameStage getNextStage() {
+            if ( GameSession.this.isSessionEnded()){
+                return null;
+            } else {
+                return GameSession.this.getGameStage_PlayerMoves();
+            }
         }
     }
 }

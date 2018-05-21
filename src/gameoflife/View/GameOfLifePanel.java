@@ -9,10 +9,14 @@ import gameoflife.model.Cell;
 import gameoflife.model.Field;
 import gameoflife.model.GameSession;
 import gameoflife.model.God;
+import gameoflife.model.GodController;
+import gameoflife.model.IGameSessionListener;
 import java.awt.BorderLayout;
 import java.awt.Dialog;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -58,9 +62,8 @@ public class GameOfLifePanel extends javax.swing.JFrame {
         fieldView.setVisible(true);
         pack();
         
-        fieldView.addListener(gameLoop);
-        
         endMoveButton.setEnabled(true);
+        
     }
     
     private void setEnableEndMoveBtn(boolean enable){
@@ -249,16 +252,16 @@ public class GameOfLifePanel extends javax.swing.JFrame {
     private void startNewGame_menuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startNewGame_menuItemActionPerformed
         gameInitDialog = new GameInitDialog(this);
         gameInitDialog.setVisible(true);
-       SessionParams params = gameInitDialog.getSessionParams();
-       if ( params != null){
-           initGameLoop(params);
-           
+        SessionParams params = gameInitDialog.getSessionParams();
+        if ( params != null){
+            initGameSession(params);
+
        }
     }//GEN-LAST:event_startNewGame_menuItemActionPerformed
 
     private void endMoveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_endMoveButtonActionPerformed
         // TODO add your handling code here:
-        gameLoop.onMoveEnded();
+        godController.endGodMove();
     }//GEN-LAST:event_endMoveButtonActionPerformed
 
     private void setCurrentPlayerInfo(Players.PlayerParameters p){
@@ -269,117 +272,116 @@ public class GameOfLifePanel extends javax.swing.JFrame {
         this.actionsCount.setText("" + actionsCount);
     }
     
-    GameLoop gameLoop = new GameLoop();
-    void initGameLoop( SessionParams params){
-        gameLoop.moveNumber = 0;
-        gameLoop.newGameSessionInit(params);
-        gameLoop.start();
-    }
-    private class GameLoop implements IFieldViewListener{
+    
+    private ViewGodsController godController = new ViewGodsController();
+    private class ViewGodsController extends GodController implements IFieldViewListener{
+        private void endGodMove(){
+            super.fireGodEndMove();
+        }
+        
+        private void selectCell(Cell cell){
+            super.fireGodSelectCell(cell);
+        }
 
-        private GameSession gameSession  = null;
-        
-        GameSession.GameStage_PlayerMoves playersStage;
-        GameSession.GameStage_Development developmentStage;
-        GameSession.GameStage_GameOverCheck gameOverCheckStage;
-        
-        private SessionParams sessionParams = null;
-        private int moveNumber = 0;
-        public void newGameSessionInit(SessionParams params){
-            moveNumber = 0;
-            this.sessionParams = params;
-            Field.FieldBuilder fb = new Field.FieldBuilder();
-            params.configureFieldBuilder(fb);
-            Field field = fb.build();
-            
-            gameSession = new GameSession(field, params.getGods(), params.getEpochCount());
-            initGameField(field, params.getPlayers());
-            
-            
-            playersStage = gameSession.getGameStage_PlayerMoves();
-            developmentStage = gameSession.getGameStage_Development();
-            gameOverCheckStage = gameSession.getGameStage_GameOverCheck();
-            
+        @Override
+        public void onCellSelect(Cell cell) {
+            selectCell(cell);
         }
         
+    }
+    
+    
+    GameSessionHandler gameSessionHandler = null;
+    private void initGameSession(SessionParams params){
         
-        God curGod = null;
+        godController = new ViewGodsController();
         
-        public void start(){
-            startPlayersStage();
+        Field.FieldBuilder filedBuilder = new Field.FieldBuilder();
+        params.configureFieldBuilder(filedBuilder);
+        Field field = filedBuilder.build();
+        
+        Collection <God> gods = params.getGods();
+        
+        int epochCount = params.getEpochCount();
+        
+        initGameField(field, params.getPlayers());
+        fieldView.addListener(godController);
+        
+        
+        GameSession gameSession = new GameSession(field, gods, epochCount, godController);
+        gameSessionHandler = new GameSessionHandler(params, gameSession);        
+        gameSession.addListener(gameSessionHandler);
+        gameSession.setPlayerMovesCount(params.getFirstMoveActionsCount());
+        gameSession.start();
+    }
+    
+    private class GameSessionHandler implements IGameSessionListener{
+
+        private SessionParams params = null;
+        private GameSession gameSession = null;
+        private int curMoveNumber = 1;
+        private GameSessionHandler(SessionParams sessionParams, GameSession session){
+            this.params = sessionParams;
+            this.gameSession = session;
         }
         
-        public void startPlayersStage(){
-            moveNumber++;
-            if ( moveNumber == 1 ){
-                playersStage.setActionsCount( sessionParams.getFirstMoveActionsCount());
-            } else if ( moveNumber == 2){
-                playersStage.setActionsCount( sessionParams.getMoveActionsCount());
-            }
-            
-            curGod = playersStage.startStage();
-            Players.PlayerParameters curPlayerParams = sessionParams.getPlayers().getPlayerParameters(curGod);
-            GameOfLifePanel.this.setCurrentPlayerInfo(curPlayerParams);
-            GameOfLifePanel.this.setCurrentActionsCountInfo( curGod.getActionsCount());
-            
-            fieldView.setEnabledFor(curGod);
-            GameOfLifePanel.this.setEnableEndMoveBtn(true);
-            
+        private void showDrawMessage(){
+            JOptionPane.showMessageDialog(GameOfLifePanel.this, "Победила дружба (✿◠‿◠)", "Игра окончена", JOptionPane.INFORMATION_MESSAGE);
         }
-        
-        private void startNextGodMove(){
-            GameOfLifePanel.this.setEnableEndMoveBtn(true);
-            curGod = playersStage.startGodMove();
-            Players.PlayerParameters curPlayerParams = sessionParams.getPlayers().getPlayerParameters(curGod);
-            GameOfLifePanel.this.setCurrentPlayerInfo(curPlayerParams);
-            GameOfLifePanel.this.setCurrentActionsCountInfo( curGod.getActionsCount() );
-            fieldView.setEnabledFor(curGod);
-            
-        }
-        
-        public void onMoveEnded(){
-            GameOfLifePanel.this.setEnableEndMoveBtn(false);
-            fieldView.setEnabled(false);
-            playersStage.endGodMove();
-            if( !playersStage.isAllMoved() ){
-                startNextGodMove();
-            } else {
-                fieldView.setEnabledFor(null);
-                
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(GameOfLifePanel.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                
-                developmentStage.start();
-                
-                GameSession.GameStatus gameStatus = gameOverCheckStage.checkGameStatus();
-                if ( gameStatus == GameSession.GameStatus.DRAW){
-                    GameOfLifePanel.this.setEnableEndMoveBtn(false);
-                    JOptionPane.showMessageDialog(GameOfLifePanel.this, "Ничья", "Конец игры", JOptionPane.INFORMATION_MESSAGE);
-                } else if ( gameStatus == GameSession.GameStatus.WIN){
-                    GameOfLifePanel.this.setEnableEndMoveBtn(false);
-                    God winner = gameOverCheckStage.getWinner();
-                    Players.PlayerParameters winnerParams = sessionParams.getPlayerParams(winner);
-                    JOptionPane.showMessageDialog(GameOfLifePanel.this, "Победитель:" + winnerParams.getName() + " -\\_o/-", "Конец игры", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    startPlayersStage();
-                }
-            }
+        private void showWinMessage(God god){
+            String playerName = params.getPlayerParams(god).getName();
+            JOptionPane.showMessageDialog(GameOfLifePanel.this, "Победил " + playerName + "(ノ°∀°)ノ⌒･*:.｡. .｡.:*･゜ﾟ･*☆", "Игра окончена", JOptionPane.INFORMATION_MESSAGE);
         }
         
         @Override
-        public void onCellSelect(Cell cell) {
-            try{
-                gameSession.getGameStage_PlayerMoves().doPLayerAction(cell);
-            } catch ( Exception e ){
-                JOptionPane.showMessageDialog(GameOfLifePanel.this, e.getMessage() ,"Хмм...", JOptionPane.INFORMATION_MESSAGE);
+        public void onGameOver(GameSession gs) {
+            
+            if ( gs.getGameStatus() == GameSession.GameStatus.DRAW){
+                showDrawMessage();
+            } else if ( gs.getGameStatus() == GameSession.GameStatus.WIN){
+                God winner = gs.getWinner();
+                showWinMessage(winner);
             }
-                GameOfLifePanel.this.setCurrentActionsCountInfo( curGod.getActionsCount());
-        }   
+        }
+
+        @Override
+        public void onGodChanged(GameSession gs) {
+            setCurrentPlayerInfo( params.getPlayerParams(gs.getCurrentGod()));
+            fieldView.setEnabledFor(gs.getCurrentGod());
+            onGodMovesCountChanged(gs);
+        }
+
+        @Override
+        public void onGodMovesStageStarted(GameSession gs) {
+            fieldView.setEnabledFor(gs.getCurrentGod());
+            setEnableEndMoveBtn(true);
+        }
+
+        @Override
+        public void onGodMovesStageEnded(GameSession gs) {
+            fieldView.setEnabledFor(null);
+            setEnableEndMoveBtn(false);
+            curMoveNumber++;
+        }
+
+        @Override
+        public void onGodMovesCountChanged(GameSession gs) {
+            setCurrentActionsCountInfo(gs.getCurrentGod().getActionsCount());
+        }
+
+        @Override
+        public void onBeforeGodNovesStageStart(GameSession gs) {
+            if (curMoveNumber == 1){
+                gs.setPlayerMovesCount(params.getFirstMoveActionsCount());
+            } else {
+                gs.setPlayerMovesCount(params.getMoveActionsCount());
+            }
+            
+        }
     }
+   
     
+   
     private FieldView fieldView;
     private GameInitDialog gameInitDialog;
     // Variables declaration - do not modify//GEN-BEGIN:variables

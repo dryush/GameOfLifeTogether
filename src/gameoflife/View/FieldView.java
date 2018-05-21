@@ -12,11 +12,8 @@ import gameoflife.model.Field;
 import gameoflife.model.God;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.LayoutManager;
-import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.AbstractAction;
 import javax.swing.JPanel;
 import java.util.Collection;
 /**
