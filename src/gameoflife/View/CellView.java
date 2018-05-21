@@ -5,6 +5,7 @@
  */
 package gameoflife.View;
 
+import gameoflife.View.creaturePainter.CreaturePaintersPool;
 import gameoflife.model.Cell;
 import gameoflife.model.Creature;
 import gameoflife.model.God;
@@ -100,6 +101,13 @@ public class CellView extends javax.swing.JPanel {
         }
     }
     
+    public void setText(String newText){
+        this.cellButton.setText(newText);
+    }
+    
+    public void setCellBackground(Color color){
+        this.cellButton.setBackground(color);
+    }
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -190,30 +198,15 @@ public class CellView extends javax.swing.JPanel {
             //CellView.this.setBorder(new BasicBorders.ButtonBorder(Color.WHITE, Color.black, Color.black, Color.black));
         }
         
-        private void repaintToClear(Cell cell){
+        private void repaintToClear(){
             CellView.this.cellButton.setBackground(deffaultColor);
-                CellView.this.cellButton.setText("");
+            CellView.this.cellButton.setText("");
 
         }
     
         private void repaintWithCreature(Creature creature){
             Players.PlayerParameters playerParam = players.getPlayerParameters(creature.getColony());
-            if (null != creature.getLiveStage())switch (creature.getLiveStage()) {
-                case BIRTH:
-                    CellView.this.cellButton.setText("+");
-                    CellView.this.cellButton.setBackground( playerParam.getColor().brighter());
-                    break;
-                case LIVE:
-                    CellView.this.cellButton.setBackground( playerParam.getColor().darker());
-                    CellView.this.cellButton.setText("");
-                    break;
-                case DIE:
-                    CellView.this.cellButton.setBackground( playerParam.getColor().darker().darker().darker());
-                    CellView.this.cellButton.setText("-");
-                    break;
-                default:
-                    break;
-            }
+            CreaturePaintersPool.getCreaturePainter(creature).paint(CellView.this, creature, playerParam.getColor());
             
         }
     }
@@ -235,7 +228,7 @@ public class CellView extends javax.swing.JPanel {
         @Override
         public void onCellCreatureDestroy(Cell cell) {
             if ( cell == CellView.this.cell)
-                CellView.this.painter.repaintToClear(cell);
+                CellView.this.painter.repaintToClear();
         }
     }
     
