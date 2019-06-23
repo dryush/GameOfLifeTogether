@@ -5,9 +5,13 @@
  */
 package gameoflife.model;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 /**
  *
@@ -51,7 +55,7 @@ public class GameSession {
         return _checkGameOverStage;
     }
     
-    private interface GameStageListener{
+    private interface IGameStageListener{
         void onStageEnd(GameStage gs);
         void onStageStart(GameStage gs);
     }
@@ -60,7 +64,7 @@ public class GameSession {
     public void start(){
         gameLoop.start();
     }
-    private class GameLoop implements GameStageListener{
+    private class GameLoop implements IGameStageListener{
 
         public GameLoop(){
         }
@@ -88,17 +92,17 @@ public class GameSession {
     }
     
     abstract private class GameStage{
-        Collection<GameStageListener> listeners =  new ArrayList();
-        public void addListener(GameStageListener listener){
+        Collection<IGameStageListener> listeners =  new ArrayList();
+        public void addListener(IGameStageListener listener){
             listeners.add(listener);
         }
         protected void fireStageEnd(){
-            for ( GameStageListener l : listeners){
+            for ( IGameStageListener l : listeners){
                 l.onStageEnd(this);
             }
         }
         protected void fireStageStart(){
-            for ( GameStageListener l : listeners){
+            for ( IGameStageListener l : listeners){
                 l.onStageStart(this);
             }
         }
@@ -116,35 +120,71 @@ public class GameSession {
     private class GameStage_Development extends GameStage{
 
         private int epochCount;
+        private int curEpoch = 0;
         private ArrayList<Colony> colonies; 
         public GameStage_Development(int epochCount, ArrayList<Colony> colonies) {
             this.epochCount = epochCount;
             this.colonies = colonies;
         }
 
-        
-        public void start() {
-            super.start();
-            for ( int i = 0; i < epochCount; i++){
-                
-                ArrayList<Colony> fixedColonies = new ArrayList<>();
-                for ( Colony colony : colonies){
-                    fixedColonies.add(colony.clone());
-                }
-                
-                for ( Colony colony : fixedColonies){
-                    for ( Creature creature : colony.getCreatures()){
-                        creature.liveEpoch();
-                    }
-                }
-                
-                for ( Colony colony : colonies){
-                    for ( Creature creature : colony.getCreatures()){
-                        creature.endEpoch();
-                    }
+        private void liveOneEpoch(){
+            System.out.println("gameoflife.model.GameSession.GameStage_Development.liveOneEpoch()");
+            ArrayList<Colony> fixedColonies = new ArrayList<>();
+            for ( Colony colony : colonies){
+                fixedColonies.add(colony.clone());
+            }
+
+            for ( Colony colony : fixedColonies){
+                for ( Creature creature : colony.getCreatures()){
+                    creature.liveEpoch();
                 }
             }
-            super.end();
+
+            for ( Colony colony : colonies){
+                for ( Creature creature : colony.getCreatures()){
+                    creature.endEpoch();
+                }
+            }
+            curEpoch ++;
+        }
+        
+        private Timer timer;
+        
+        @Override
+        public void start() {
+            super.start();
+            
+            curEpoch = 1;
+            timer = new Timer(200, new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent ae) {
+                    liveOneEpoch();
+                    if ( curEpoch >= epochCount){
+                        timer.stop();
+                        end();
+                    }
+                }
+            });
+            timer.start();
+            //for ( int i = 0; i < epochCount; i++){
+            
+//                ArrayList<Colony> fixedColonies = new ArrayList<>();
+//                for ( Colony colony : colonies){
+//                    fixedColonies.add(colony.clone());
+//                }
+//                
+//                for ( Colony colony : fixedColonies){
+//                    for ( Creature creature : colony.getCreatures()){
+//                        creature.liveEpoch();
+//                    }
+//                }
+//                
+//                for ( Colony colony : colonies){
+//                    for ( Creature creature : colony.getCreatures()){
+//                        creature.endEpoch();
+//                    }
+//                }
+            //}
         }
 
         @Override
@@ -215,6 +255,7 @@ public class GameSession {
         
         @Override
         public void start(){
+            System.out.println("gameoflife.model.GameSession.GameStage_GodsMoves.start()");
             super.start();
             fireBeforeGodsMovesStarted();
             startStage();
