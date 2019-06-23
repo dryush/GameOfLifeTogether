@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
 
 /**
  *
@@ -73,11 +74,14 @@ public class CellView extends javax.swing.JPanel {
         this.setEnabled(false);
         this.cellButton.setEnabled(false);
         this.setBackground(Color.BLACK);
+        this.setBorder(BorderFactory.createLineBorder(Color.RED));
     }
     
     public void setEnabled(){
         this.setEnabled(true);
         this.cellButton.setEnabled(true);
+        this.setBackground(Color.WHITE);
+        this.setBorder(BorderFactory.createLineBorder(Color.GRAY));
     }
     
     
